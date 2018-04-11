@@ -1,0 +1,136 @@
+function [ozo1,ozo2] = findPath(ozo1seq,ozo2seq,nodesWeights,adjMatrix)
+
+%indexes for best path for each section for each bot
+i1=1;
+i2=1;
+i3=1;
+%for bot2
+i4=1;
+i5=1;
+i6=1;
+
+%find paths using bfs and dfs
+paths1=[bfs(adjMatrix, ozo1seq(1), ozo1seq(2)) dfs(adjMatrix, ozo1seq(1), ozo1seq(2))];
+%keep only unique paths
+paths1=uniquecell(paths1);
+%check length of paths
+len1=lengthPaths(nodesWeights,paths1);
+%get indexes of paths in sorted order
+[out,id1] = sort(len1); %id1(1) is index of best path e.g. paths1{id1(1)} is shortest path
+paths2=[bfs(adjMatrix, ozo1seq(2), ozo1seq(3)) dfs(adjMatrix, ozo1seq(2), ozo1seq(3))];
+paths2=uniquecell(paths2);
+len2=lengthPaths(nodesWeights,paths2);
+[out,id2] = sort(len2);
+paths3=[bfs(adjMatrix,ozo1seq(3), ozo1seq(4)) dfs(adjMatrix, ozo1seq(3), ozo1seq(4))];
+paths3=uniquecell(paths3);
+len3=lengthPaths(nodesWeights,paths3);
+[out,id3] = sort(len3);
+ozo1path=[paths1{id1(i1)} paths2{id2(i2)}(2:end) paths3{id3(i3)}(2:end)];
+
+%repeat the node in path according to its weight and get index of targets
+%in this full path vectors
+ozo1=[];
+o1section=[];
+for i=1:length(ozo1path)
+    if nodesWeights(ozo1path(i))>1
+        o1section=[o1section (length(ozo1)+1)] 
+    end
+   for j=1:nodesWeights(ozo1path(i))
+       ozo1=[ozo1 ozo1path(i)]
+   end
+end
+
+%ozobot2
+paths4=[bfs(adjMatrix, ozo2seq(1), ozo2seq(2)) dfs(adjMatrix, ozo2seq(1), ozo2seq(2))];
+paths4=uniquecell(paths4);
+len4=lengthPaths(nodesWeights,paths4);
+[out,id4] = sort(len4);
+paths5=[bfs(adjMatrix, ozo2seq(2), ozo2seq(3)) dfs(adjMatrix, ozo2seq(2), ozo2seq(3))];
+paths5=uniquecell(paths5);
+len5=lengthPaths(nodesWeights,paths5);
+[out,id5] = sort(len5);
+paths6=[bfs(adjMatrix, ozo2seq(3), ozo2seq(4)) dfs(adjMatrix, ozo2seq(3), ozo2seq(4))];
+paths6=uniquecell(paths6);
+len6=lengthPaths(nodesWeights,paths6);
+[out,id6] = sort(len6);
+ozo2path=[paths4{id4(i4)} paths5{id5(i5)}(2:end) paths6{id6(i6)}(2:end)]
+
+ozo2=[];
+o2section=[];
+for i=1:length(ozo2path)
+    if nodesWeights(ozo2path(i))>1
+        o2section=[o2section (length(ozo2)+1)]
+    end
+   for j=1:nodesWeights(ozo2path(i))
+
+       ozo2=[ozo2 ozo2path(i)]
+   end
+end
+
+%check colisions e update section of the path where colision ocurred
+[colide,index]=checkColision(ozo1,ozo2)
+    while(colide)
+
+        if index<=o2section(1) %check if colision occurs in first section of bot 2
+            if i4<length(id4)
+                i4=i4+1
+                ozo2path=[paths4{id4(i4)} paths5{id5(i5)}(2:end) paths6{id6(i6)}(2:end)];
+            elseif i1<length(id1)
+                i1=i1+1
+                ozo1path=[paths1{id1(i1)} paths2{id2(i2)}(2:end) paths3{id3(i3)}(2:end)];
+            end
+        
+        end
+        
+        if index>o2section(1)&&index<=o2section(2) %check if colision occurs in second section of bot 2
+            if i5<length(id5)
+                i5=i5+1
+                ozo2path=[paths4{id4(i4)} paths5{id5(i5)}(2:end) paths6{id6(i6)}(2:end)]
+            elseif i2<length(id2)
+                i2=i2+1
+                ozo1path=[paths1{id1(i1)} paths2{id2(i2)}(2:end) paths3{id3(i3)}(2:end)];
+            end
+        
+        end
+        
+        if index>o2section(2) %check if colision occurs in third section of bot 2
+            if i6<length(id6)
+                i6=i6+1
+                ozo2path=[paths4{id4(i4)} paths5{id5(i5)}(2:end) paths6{id6(i6)}(2:end)];
+            elseif i3<length(id3)
+                i3=i3+1
+                ozo1path=[paths1{id1(i1)} paths2{id2(i2)}(2:end) paths3{id3(i3)}(2:end)];
+            end
+            
+        end
+        
+        ozo1=[];
+        o1section=[];
+        for i=1:length(ozo1path)
+            if nodesWeights(ozo1path(i))>1
+                o1section=[o1section (length(ozo1)+1)]
+            end
+            for j=1:nodesWeights(ozo1path(i))
+                ozo1=[ozo1 ozo1path(i)]
+            end
+        end
+        
+        ozo2=[];
+        o2section=[];
+        for i=1:length(ozo2path)
+            if nodesWeights(ozo2path(i))>1
+                o2section=[o2section (length(ozo2)+1)]
+            end
+            for j=1:nodesWeights(ozo2path(i))
+                
+                ozo2=[ozo2 ozo2path(i)]
+            end
+        end
+        [colide,index]=checkColision(ozo1,ozo2)
+        
+    end
+
+csvwrite('ozo1.txt',ozo1);
+csvwrite('ozo2.txt',ozo2);
+
+end
