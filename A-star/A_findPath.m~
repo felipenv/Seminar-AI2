@@ -1,0 +1,15 @@
+function [full_path] = A_findPath(ozoseq,nodesWeights,adjMatrix,operations,paths_bots)
+
+full_path=[];
+%find paths using A-star
+for i=1:operations+1
+    path=A_star(adjMatrix, ozoseq(i), ozoseq(i+1),paths_bots)
+    for j=1:nodesWeights(ozoseq(i+1))-2
+        path = [path ozoseq(i+1)];
+            
+    end
+    
+    full_path=[full_path path];
+end
+        
+end
