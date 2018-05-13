@@ -33,12 +33,16 @@ nBots=3;
 ozoseq{1}=[1 12 23 19 5];
 ozoseq{2}=[1 19 12 23 5];
 ozoseq{3}=[1 12 19 23 5];
+%ozoseq{4}=[1 23 19 12 5];
 
 paths_bots={};
 
 for i=1:nBots
     
     paths_bots{i}=A_findPath(ozoseq{i},nodesWeights,adjMatrix,operations,paths_bots)
+    for j=1:i-1
+        paths_bots{i}=[1 paths_bots{i}];
+    end
     csvwrite(strcat('ozo',int2str(i),'.txt'),paths_bots{i});
 end
 

@@ -1,5 +1,5 @@
 % return cell array with n_paths ordered by shortest lenght 
-function [bestPath, waitingNodes] = A_star(adjMatrix, startNode, targetNode,stepNumber,paths_bots)
+function [bestPath] = A_star(adjMatrix, startNode, targetNode,stepNumber,paths_bots)
 
 %enqueue start node
 queue=startNode;
@@ -9,6 +9,7 @@ path=zeros(1,length(adjMatrix));
 waitingNodes=zeros(1,length(adjMatrix));
 %stepNumber=0;
 limit=10;
+bestPath=v_best;
 %A-star loop
 while(v_best~=targetNode) %&& allVisited(visitedNodes,targetNode)==0)
     u = queue(1);
@@ -26,29 +27,9 @@ while(v_best~=targetNode) %&& allVisited(visitedNodes,targetNode)==0)
     %enqueue v_best
     queue=[queue v_best];
 
-    if v_best~=u
-        path(v_best)=u;
-    else
-        waitingNodes(v_best)=waitingNodes(v_best)+1;
-    end
     distances=inf(1,length(adjMatrix));
+    bestPath=[bestPath v_best];
 
-    %reconstruct path found
-    if(v_best==targetNode)%if reached target, append a path to cell array of paths
-        pathSequence=targetNode;
-        node=targetNode;
-        stepSize=0;
-        while (node~=startNode&&stepSize<limit) %loop to reconstruct path backing track
-            %lenPath=lenPath+nodesWeights(node);
-            pathSequence= [pathSequence path(node)];
-            node = path(node);
-            stepSize=stepSize+1;
-            
-        end
-        bestPath=fliplr(pathSequence); %flip path to get in correct order
-        
-    end
-        
 end %end of while. 
 
 end
